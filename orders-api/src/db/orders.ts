@@ -1,14 +1,12 @@
-import { AppDataSource } from './data-source'
-import { Order, OrderStatus as OrderStatusEnum } from './entities/Order'
-import { OrderItem } from './entities/OrderItem'
-import { IdempotencyKey } from './entities/IdempotencyKey'
+import {AppDataSource} from './data-source'
+import {Order, OrderStatus as OrderStatusEnum} from './entities/Order'
+import {OrderItem} from './entities/OrderItem'
+import {IdempotencyKey} from './entities/IdempotencyKey'
 import * as productsDb from './products'
-import type { CreateOrderInput } from '../validators/orders'
-import { ORDER_STATUS, type OrderStatus } from '../constants'
-import { MoreThan, LessThanOrEqual, GreaterThanOrEqual } from 'typeorm'
+import type {CreateOrderInput} from '../validators/orders'
+import {ORDER_STATUS, type OrderStatus} from '../constants'
 import logger from '../logger'
 
-// Type alias para compatibilidad
 export type OrderWithItems = Order
 
 export interface IdempotencyRecord {
@@ -19,9 +17,7 @@ export interface IdempotencyRecord {
   response_body: string
 }
 
-// Obtener repositorios
 const getOrderRepository = () => AppDataSource.getRepository(Order)
-const getOrderItemRepository = () => AppDataSource.getRepository(OrderItem)
 const getIdempotencyKeyRepository = () =>
   AppDataSource.getRepository(IdempotencyKey)
 
@@ -29,7 +25,7 @@ export async function checkIdempotencyKey(
   key: string
 ): Promise<IdempotencyRecord | null> {
   const repository = getIdempotencyKeyRepository()
-
+  logger.info(`Checking idempotency key: ${key} `)
   const record = await repository
     .createQueryBuilder('idem')
     .where('idem.key = :key', { key })
@@ -85,7 +81,6 @@ export async function createOrder(
       subtotal: number
     }> = []
 
-    // Validar productos y calcular totales
     for (const item of data.items) {
       const product = await productsDb.getProductById(item.product_id)
 
@@ -115,7 +110,6 @@ export async function createOrder(
       })
     }
 
-    // Crear order
     const order = queryRunner.manager.create(Order, {
       customer_id: data.customer_id,
       status: OrderStatusEnum.CREATED,
@@ -124,7 +118,6 @@ export async function createOrder(
 
     const savedOrder = await queryRunner.manager.save(Order, order)
 
-    // Crear order items
     const orderItems: OrderItem[] = []
     for (const itemData of itemsToCreate) {
       const orderItem = queryRunner.manager.create(OrderItem, {
@@ -257,12 +250,10 @@ export async function cancelOrder(
       }
     }
 
-    // Restaurar stock
     for (const item of order.items) {
       await productsDb.incrementStock(item.product_id, item.qty)
     }
 
-    // Actualizar order
     order.status = OrderStatusEnum.CANCELED
     order.canceled_at = new Date()
 
@@ -281,5 +272,4 @@ export async function cancelOrder(
   }
 }
 
-// Re-exportar tipos desde las entidades
 export type { Order, OrderItem }

@@ -39,13 +39,22 @@ export async function validateCustomer(customerId: number): Promise<Customer> {
 
 export async function createOrder(
   customerId: number,
-  items: OrderItem[]
+  items: OrderItem[],
+  idempotencyKey: string
 ): Promise<Order> {
   try {
-    const response = await ordersClient.post<Order>('/orders', {
-      customer_id: customerId,
-      items
-    })
+    const response = await ordersClient.post<Order>(
+      '/orders',
+      {
+        customer_id: customerId,
+        items
+      },
+      {
+        headers: {
+          'X-Idempotency-Key': idempotencyKey
+        }
+      }
+    )
     return response.data
   } catch (error: any) {
     const errorMessage =

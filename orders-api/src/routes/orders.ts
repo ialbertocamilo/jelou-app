@@ -1,15 +1,14 @@
-import { Router, Request, Response, type IRouter } from 'express'
+import { type IRouter, Request, Response, Router } from 'express'
 import { asyncHandler } from '../middlewares/errorHandler'
 import { createOrderSchema, searchOrdersSchema } from '../validators/orders'
 import * as ordersDb from '../db/orders'
 import * as customersService from '../services/customers'
 import {
-  HTTP_STATUS_OK,
+  ERROR_MESSAGES,
+  HTTP_STATUS_BAD_REQUEST,
   HTTP_STATUS_CREATED,
   HTTP_STATUS_NOT_FOUND,
-  HTTP_STATUS_BAD_REQUEST,
-  HTTP_STATUS_CONFLICT,
-  ERROR_MESSAGES
+  HTTP_STATUS_OK
 } from '../constants'
 import logger from '../logger'
 
@@ -19,8 +18,23 @@ router.post(
   '/',
   asyncHandler(async (req: Request, res: Response) => {
     const data = createOrderSchema.parse(req.body)
+    const idempotencyKey = req.headers['x-idempotency-key'] as string
 
-    const customer = await customersService.validateCustomer(data.customer_id)
+    if (idempotencyKey) {
+      const existing = await ordersDb.checkIdempotencyKey(idempotencyKey)
+
+      if (existing) {
+        logger.info(
+          { idempotencyKey },
+          'Returning cached response for idempotency key'
+        )
+        const cachedResponse = JSON.parse(existing.response_body)
+        res.status(HTTP_STATUS_OK).json(cachedResponse)
+        return
+      }
+    }
+
+    const customer = await customersService.getCustomerById(data.customer_id)
 
     if (!customer) {
       res.status(HTTP_STATUS_BAD_REQUEST).json({
@@ -32,6 +46,16 @@ router.post(
 
     const order = await ordersDb.createOrder(data)
 
+    if (idempotencyKey) {
+      await ordersDb.saveIdempotencyKey(
+        idempotencyKey,
+        'order_create',
+        order.id,
+        'completed',
+        order
+      )
+    }
+
     res.status(HTTP_STATUS_CREATED).json(order)
   })
 )
@@ -39,7 +63,7 @@ router.post(
 router.get(
   '/:id',
   asyncHandler(async (req: Request, res: Response) => {
-    const id = parseInt(req.params.id)
+    const id = parseInt(req.params.id as string)
 
     if (isNaN(id)) {
       res
@@ -88,7 +112,7 @@ router.get(
 router.post(
   '/:id/confirm',
   asyncHandler(async (req: Request, res: Response) => {
-    const id = parseInt(req.params.id)
+    const id = parseInt(req.params.id as string)
     const idempotencyKey = req.headers['x-idempotency-key'] as string
 
     if (isNaN(id)) {
@@ -141,7 +165,7 @@ router.post(
 router.post(
   '/:id/cancel',
   asyncHandler(async (req: Request, res: Response) => {
-    const id = parseInt(req.params.id)
+    const id = parseInt(req.params.id as string)
 
     if (isNaN(id)) {
       res

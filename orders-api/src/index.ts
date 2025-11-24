@@ -35,7 +35,6 @@ app.use('/orders', ordersRouter)
 
 app.use(errorHandler)
 
-// Inicializar TypeORM y luego iniciar el servidor
 async function bootstrap() {
   try {
     await initializeDatabase()

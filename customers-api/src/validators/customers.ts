@@ -19,14 +19,11 @@ export const updateCustomerSchema = z
 export const searchCustomersSchema = z.object({
   search: z.string().optional(),
   cursor: z.string().optional(),
-  limit: z.preprocess(
-    (val) => {
-      if (val === undefined) return 20
-      const parsed = parseInt(String(val), 10)
-      return isNaN(parsed) ? 20 : parsed
-    },
-    z.number().int().positive().max(100).default(20)
-  )
+  limit: z.preprocess((val) => {
+    if (val === undefined) return 20
+    const parsed = parseInt(String(val), 10)
+    return isNaN(parsed) ? 20 : parsed
+  }, z.number().int().positive().max(100).default(20))
 })
 
 export type CreateCustomerInput = z.infer<typeof createCustomerSchema>

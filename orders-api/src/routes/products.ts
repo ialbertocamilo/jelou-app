@@ -1,17 +1,17 @@
-import { Router, Request, Response, type IRouter } from 'express'
+import { type IRouter, Request, Response, Router } from 'express'
 import { asyncHandler } from '../middlewares/errorHandler'
 import {
   createProductSchema,
-  updateProductSchema,
-  searchProductsSchema
+  searchProductsSchema,
+  updateProductSchema
 } from '../validators/products'
 import * as productsDb from '../db/products'
 import {
-  HTTP_STATUS_OK,
+  ERROR_MESSAGES,
+  HTTP_STATUS_BAD_REQUEST,
   HTTP_STATUS_CREATED,
   HTTP_STATUS_NOT_FOUND,
-  HTTP_STATUS_BAD_REQUEST,
-  ERROR_MESSAGES
+  HTTP_STATUS_OK
 } from '../constants'
 import logger from '../logger'
 
@@ -40,7 +40,7 @@ router.post(
 router.get(
   '/:id',
   asyncHandler(async (req: Request, res: Response) => {
-    const id = parseInt(req.params.id)
+    const id = parseInt(req.params.id as string)
 
     if (isNaN(id)) {
       res
@@ -87,7 +87,7 @@ router.get(
 router.patch(
   '/:id',
   asyncHandler(async (req: Request, res: Response) => {
-    const id = parseInt(req.params.id)
+    const id = parseInt(req.params.id as string)
 
     if (isNaN(id)) {
       res

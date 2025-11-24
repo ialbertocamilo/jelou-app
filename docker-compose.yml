@@ -32,10 +32,11 @@ services:
     build:
       context: customers-api
       dockerfile: Dockerfile
-    env_file:
-      - customers-api/.env
     environment:
       - PORT=3000
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
     ports:
       - ${CUSTOMERS_PORT}:3000
     depends_on:
@@ -47,10 +48,11 @@ services:
     build:
       context: orders-api
       dockerfile: Dockerfile
-    env_file:
-      - orders-api/.env
     environment:
       - PORT=3000
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
     ports:
       - ${ORDERS_PORT}:3000
     depends_on:

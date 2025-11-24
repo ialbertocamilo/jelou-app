@@ -1,17 +1,17 @@
-import { Router, Request, Response, type IRouter } from 'express'
+import { type IRouter, Request, Response, Router } from 'express'
 import { asyncHandler } from '../middlewares/errorHandler'
 import {
   createCustomerSchema,
-  updateCustomerSchema,
-  searchCustomersSchema
+  searchCustomersSchema,
+  updateCustomerSchema
 } from '../validators/customers'
 import * as customersDb from '../db/customers'
 import {
-  HTTP_STATUS_OK,
+  ERROR_MESSAGES,
+  HTTP_STATUS_BAD_REQUEST,
   HTTP_STATUS_CREATED,
   HTTP_STATUS_NOT_FOUND,
-  HTTP_STATUS_BAD_REQUEST,
-  ERROR_MESSAGES,
+  HTTP_STATUS_OK,
   SUCCESS_MESSAGES
 } from '../constants'
 import logger from '../logger'
@@ -41,7 +41,7 @@ router.post(
 router.get(
   '/:id',
   asyncHandler(async (req: Request, res: Response) => {
-    const id = parseInt(req.params.id)
+    const id = parseInt(req.params.id as string)
 
     if (isNaN(id)) {
       res
@@ -89,7 +89,7 @@ router.get(
 router.put(
   '/:id',
   asyncHandler(async (req: Request, res: Response) => {
-    const id = parseInt(req.params.id)
+    const id = parseInt(req.params.id as string)
 
     if (isNaN(id)) {
       res
@@ -127,7 +127,7 @@ router.put(
 router.delete(
   '/:id',
   asyncHandler(async (req: Request, res: Response) => {
-    const id = parseInt(req.params.id)
+    const id = parseInt(req.params.id as string)
 
     if (isNaN(id)) {
       res

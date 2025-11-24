@@ -1,10 +1,4 @@
-import {
-  Entity,
-  PrimaryColumn,
-  Column,
-  CreateDateColumn,
-  Index
-} from 'typeorm'
+import { Entity, PrimaryColumn, Column, CreateDateColumn, Index } from 'typeorm'
 
 @Entity('idempotency_keys')
 @Index('idx_expires_at', ['expires_at'])

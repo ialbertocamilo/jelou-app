@@ -1,15 +1,15 @@
-import { Request, Response, NextFunction } from 'express'
+import { NextFunction, Request, Response } from 'express'
 import jwt from 'jsonwebtoken'
 import {
-  HTTP_STATUS_UNAUTHORIZED,
+  ERROR_MESSAGES,
   HTTP_STATUS_FORBIDDEN,
-  ERROR_MESSAGES
+  HTTP_STATUS_UNAUTHORIZED
 } from '../constants'
 import logger from '../logger'
 
 const JWT_SECRET =
   process.env.JWT_SECRET || 'dev-secret-key-change-in-production'
-const SERVICE_TOKEN = process.env.SERVICE_TOKEN || 'service-secret-token'
+const SERVICE_TOKEN = process.env.SERVICE_TOKEN || 'secret-token'
 
 export interface AuthRequest extends Request {
   user?: {

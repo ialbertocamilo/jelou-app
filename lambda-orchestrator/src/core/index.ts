@@ -1,7 +1,4 @@
-import {
-  ErrorResponse,
-  OrchestratorResponse
-} from '../types'
+import { ErrorResponse, OrchestratorResponse } from '../types'
 import {
   confirmOrder,
   createOrder,
@@ -49,7 +46,11 @@ export default {
 
       const customer = await validateCustomer(validatedData.customer_id)
 
-      const order = await createOrder(customer.id, validatedData.items)
+      const order = await createOrder(
+        customer.id,
+        validatedData.items,
+        validatedData.idempotency_key
+      )
 
       const confirmedOrder = await confirmOrder(
         order.id,

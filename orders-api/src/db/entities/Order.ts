@@ -1,12 +1,10 @@
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  Entity,
   Index,
   OneToMany,
-  ManyToOne,
-  JoinColumn
+  PrimaryGeneratedColumn
 } from 'typeorm'
 import { OrderItem } from './OrderItem'
 

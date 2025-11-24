@@ -4,6 +4,7 @@ import { Product } from './entities/Product'
 import { Order } from './entities/Order'
 import { OrderItem } from './entities/OrderItem'
 import { IdempotencyKey } from './entities/IdempotencyKey'
+import { Customer } from './entities/Customer'
 import logger from '../logger'
 
 export const AppDataSource = new DataSource({
@@ -13,8 +14,8 @@ export const AppDataSource = new DataSource({
   username: process.env.MYSQL_USER || 'jelou',
   password: process.env.MYSQL_PASSWORD || 'jelou_password',
   database: process.env.MYSQL_DATABASE || 'jelou_db',
-  entities: [Product, Order, OrderItem, IdempotencyKey],
-  synchronize: false, // No auto-sync en producción
+  entities: [Product, Order, OrderItem, IdempotencyKey, Customer],
+  synchronize: false,
   logging: process.env.NODE_ENV === 'development',
   poolSize: 10,
   extra: {
@@ -26,7 +27,6 @@ export const AppDataSource = new DataSource({
   }
 })
 
-// Inicializar la conexión
 export async function initializeDatabase(): Promise<void> {
   try {
     await AppDataSource.initialize()

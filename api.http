@@ -1,13 +1,13 @@
 ### Variables
-@customersBaseUrl = http://localhost:3001
-@ordersBaseUrl = http://localhost:3002
+@customersBaseUrl = http://217.77.15.104:3001
+@ordersBaseUrl = http://217.77.15.104:3002
 @orchestratorUrl = https://63efqt72we.execute-api.us-east-1.amazonaws.com
 
 # Test data - Update these IDs after creating resources
 @customerId = 1
 @productId = 1
 @orderId = 1
-@serviceToken = service-secret-token
+@serviceToken = secret-token
 
 ################################################################################
 # CUSTOMERS API
@@ -46,7 +46,7 @@ GET {{customersBaseUrl}}/customers
 GET {{customersBaseUrl}}/customers?search=acme
 
 ### Search Customers (with pagination)
-GET {{customersBaseUrl}}/customers?limit=10&cursor=5
+GET {{customersBaseUrl}}/customers?limit=10&cursor=1
 
 ### Update Customer
 PUT {{customersBaseUrl}}/customers/{{customerId}}
@@ -189,8 +189,7 @@ Content-Type: application/json
       "qty": 3
     }
   ],
-  "idempotency_key": "unique-key-123",
-  "correlation_id": "req-abc-123"
+  "idempotency_key": "andnw2222"
 }
 
 ### Create and Confirm Order (without correlation ID)
@@ -201,91 +200,9 @@ Content-Type: application/json
   "customer_id": 1,
   "items": [
     {
-      "product_id": 2,
+      "product_id": 1,
       "qty": 2
-    },
-    {
-      "product_id": 3,
-      "qty": 1
     }
   ],
-  "idempotency_key": "unique-key-456"
+  "idempotency_key": "unique-key-123"
 }
-
-################################################################################
-# ERROR CASES - Test validation and error handling
-################################################################################
-
-### Error: Create Customer with duplicate email
-POST {{customersBaseUrl}}/customers
-Content-Type: application/json
-
-{
-  "name": "Duplicate Test",
-  "email": "ops@acme.com"
-}
-
-### Error: Create Customer with invalid email
-POST {{customersBaseUrl}}/customers
-Content-Type: application/json
-
-{
-  "name": "Invalid Email",
-  "email": "not-an-email"
-}
-
-### Error: Create Customer missing required fields
-POST {{customersBaseUrl}}/customers
-Content-Type: application/json
-
-{
-  "phone": "+1-555-0300"
-}
-
-### Error: Get non-existent customer
-GET {{customersBaseUrl}}/customers/99999
-
-### Error: Create Product with duplicate SKU
-POST {{ordersBaseUrl}}/products
-Content-Type: application/json
-
-{
-  "sku": "LAPTOP-PRO-15",
-  "name": "Duplicate SKU Test",
-  "price_cents": 100000
-}
-
-### Error: Create Order with invalid customer
-POST {{ordersBaseUrl}}/orders
-Content-Type: application/json
-
-{
-  "customer_id": 99999,
-  "items": [
-    {
-      "product_id": 1,
-      "qty": 1
-    }
-  ]
-}
-
-### Error: Create Order with insufficient stock
-POST {{ordersBaseUrl}}/orders
-Content-Type: application/json
-
-{
-  "customer_id": 1,
-  "items": [
-    {
-      "product_id": 1,
-      "qty": 99999
-    }
-  ]
-}
-
-### Error: Confirm order without idempotency key
-POST {{ordersBaseUrl}}/orders/{{orderId}}/confirm
-
-### Error: Confirm non-existent order
-POST {{ordersBaseUrl}}/orders/99999/confirm
-X-Idempotency-Key: unique-key-error-test

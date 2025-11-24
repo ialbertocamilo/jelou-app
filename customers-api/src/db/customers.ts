@@ -1,12 +1,11 @@
 import { AppDataSource } from './data-source'
 import { Customer } from './entities/Customer'
-import { Like, MoreThan } from 'typeorm'
+import { MoreThan } from 'typeorm'
 import type {
   CreateCustomerInput,
   UpdateCustomerInput
 } from '../validators/customers'
 
-// Obtener el repositorio de Customer
 const getCustomerRepository = () => AppDataSource.getRepository(Customer)
 
 export async function createCustomer(
@@ -49,8 +48,6 @@ export async function searchCustomers(
   }
 
   if (search) {
-    // TypeORM no soporta búsqueda OR múltiple de forma simple
-    // Usamos query builder para mayor flexibilidad
     const queryBuilder = repository.createQueryBuilder('customer')
 
     queryBuilder.where('customer.id > :cursor', {
@@ -69,7 +66,6 @@ export async function searchCustomers(
     return await queryBuilder.getMany()
   }
 
-  // Sin búsqueda, usamos find normal
   return await repository.find({
     where: whereConditions,
     order: { id: 'ASC' },
@@ -88,7 +84,6 @@ export async function updateCustomer(
     return null
   }
 
-  // Actualizar solo los campos provistos
   if (data.name !== undefined) {
     customer.name = data.name
   }
@@ -110,5 +105,4 @@ export async function deleteCustomer(id: number): Promise<boolean> {
   return (result.affected ?? 0) > 0
 }
 
-// Re-exportar la interfaz Customer desde la entidad
 export type { Customer }

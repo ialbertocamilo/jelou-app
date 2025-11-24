@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "serverless offline",
     "deploy": "serverless deploy",
+    "login": "serverless login",
+    "info": "serverless info",
     "build": "tsc",
     "test": "vitest run"
   },
@@ -15,9 +17,8 @@
   "devDependencies": {
     "@types/aws-lambda": "^8.10.145",
     "@types/node": "^22.10.2",
-    "serverless": "^3.39.0",
-    "serverless-esbuild": "^1.52.1",
-    "serverless-offline": "^13.9.0",
+    "serverless": "^4.4.0",
+    "serverless-offline": "^14.0.0",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"
   }

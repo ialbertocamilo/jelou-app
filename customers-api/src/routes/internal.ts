@@ -1,12 +1,12 @@
-import { Router, Request, Response, type IRouter } from 'express'
+import { type IRouter, Request, Response, Router } from 'express'
 import { asyncHandler } from '../middlewares/errorHandler'
 import { authenticateService } from '../middlewares/auth'
 import * as customersDb from '../db/customers'
 import {
-  HTTP_STATUS_OK,
-  HTTP_STATUS_NOT_FOUND,
+  ERROR_MESSAGES,
   HTTP_STATUS_BAD_REQUEST,
-  ERROR_MESSAGES
+  HTTP_STATUS_NOT_FOUND,
+  HTTP_STATUS_OK
 } from '../constants'
 
 const router: IRouter = Router()
@@ -15,7 +15,7 @@ router.get(
   '/customers/:id',
   authenticateService,
   asyncHandler(async (req: Request, res: Response) => {
-    const id = parseInt(req.params.id)
+    const id = parseInt(req.params.id as string)
 
     if (isNaN(id)) {
       res

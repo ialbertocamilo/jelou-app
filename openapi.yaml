@@ -64,7 +64,7 @@ paths:
   # ==================== Customers API ====================
   /customers:
     servers:
-      - url: http://localhost:3001
+      - url: http://217.77.15.104:3001
         description: Customers API
     post:
       summary: Create customer
@@ -128,7 +128,7 @@ paths:
 
   /customers/{id}:
     servers:
-      - url: http://localhost:3001
+      - url: http://217.77.15.104:3001
         description: Customers API
     get:
       summary: Get customer by ID
@@ -198,7 +198,7 @@ paths:
 
   /internal/customers/{id}:
     servers:
-      - url: http://localhost:3001
+      - url: http://217.77.15.104:3001
         description: Customers API
     get:
       summary: Get customer by ID (internal service endpoint)
@@ -223,7 +223,7 @@ paths:
   # ==================== Products API ====================
   /products:
     servers:
-      - url: http://localhost:3002
+      - url: http://217.77.15.104:3002
         description: Orders API
     post:
       summary: Create product
@@ -281,7 +281,7 @@ paths:
 
   /products/{id}:
     servers:
-      - url: http://localhost:3002
+      - url: http://217.77.15.104:3002
         description: Orders API
     get:
       summary: Get product by ID
@@ -324,7 +324,7 @@ paths:
   # ==================== Orders API ====================
   /orders:
     servers:
-      - url: http://localhost:3002
+      - url: http://217.77.15.104:3002
         description: Orders API
     post:
       summary: Create order
@@ -402,7 +402,7 @@ paths:
 
   /orders/{id}:
     servers:
-      - url: http://localhost:3002
+      - url: http://217.77.15.104:3002
         description: Orders API
     get:
       summary: Get order with items
@@ -422,7 +422,7 @@ paths:
 
   /orders/{id}/confirm:
     servers:
-      - url: http://localhost:3002
+      - url: http://217.77.15.104:3002
         description: Orders API
     post:
       summary: Confirm order (IDEMPOTENT)
@@ -446,7 +446,7 @@ paths:
 
   /orders/{id}/cancel:
     servers:
-      - url: http://localhost:3002
+      - url: http://217.77.15.104:3002
         description: Orders API
     post:
       summary: Cancel order and restore stock
@@ -574,7 +574,7 @@ components:
           example: Validation error
         message:
           type: string
-          example: "customer_id: Expected number, received string"
+          example: 'customer_id: Expected number, received string'
 
     # ==================== Customer Schemas ====================
     Customer:
@@ -585,15 +585,15 @@ components:
           example: 1
         name:
           type: string
-          example: ACME Corporation
+          example: Example Company
         email:
           type: string
           format: email
-          example: ops@acme.com
+          example: contact@example.com
         phone:
           type: string
           nullable: true
-          example: +1-555-0100
+          example: +51987654321
         created_at:
           type: string
           format: date-time
@@ -609,16 +609,16 @@ components:
           type: string
           minLength: 1
           maxLength: 255
-          example: ACME Corporation
+          example: Example Company
         email:
           type: string
           format: email
           maxLength: 255
-          example: ops@acme.com
+          example: contact@example.com
         phone:
           type: string
           maxLength: 50
-          example: +1-555-0100
+          example: +51987654321
 
     UpdateCustomerRequest:
       type: object

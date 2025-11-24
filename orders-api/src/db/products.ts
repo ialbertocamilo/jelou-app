@@ -6,7 +6,6 @@ import type {
   UpdateProductInput
 } from '../validators/products'
 
-// Obtener el repositorio de Product
 const getProductRepository = () => AppDataSource.getRepository(Product)
 
 export async function createProduct(
@@ -42,24 +41,25 @@ export async function searchProducts(
   const repository = getProductRepository()
 
   if (search) {
-    // Usar query builder para búsquedas complejas
     const queryBuilder = repository.createQueryBuilder('product')
 
     queryBuilder.where('product.id > :cursor', {
       cursor: cursor ? parseInt(cursor) : 0
     })
 
-    queryBuilder.andWhere('(product.sku LIKE :search OR product.name LIKE :search)', {
-      search: `%${search}%`
-    })
+    queryBuilder.andWhere(
+      '(product.sku LIKE :search OR product.name LIKE :search)',
+      {
+        search: `%${search}%`
+      }
+    )
 
     queryBuilder.orderBy('product.id', 'ASC').take(limit + 1)
 
     return await queryBuilder.getMany()
   }
 
-  // Sin búsqueda, usamos find normal
-  const whereConditions: any = {}
+  const whereConditions: Record<string, any> = {}
 
   if (cursor) {
     whereConditions.id = MoreThan(parseInt(cursor))
@@ -83,7 +83,6 @@ export async function updateProduct(
     return null
   }
 
-  // Actualizar solo los campos provistos
   if (data.name !== undefined) {
     product.name = data.name
   }
@@ -105,7 +104,6 @@ export async function decrementStock(
 ): Promise<boolean> {
   const repository = getProductRepository()
 
-  // Usar query builder para UPDATE condicional
   const result = await repository
     .createQueryBuilder()
     .update(Product)
@@ -130,5 +128,4 @@ export async function incrementStock(
     .execute()
 }
 
-// Re-exportar el tipo Product desde la entidad
 export type { Product }

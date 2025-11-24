@@ -1,16 +1,30 @@
 service: lambda-orchestrator
 
-frameworkVersion: '3'
+frameworkVersion: '4'
 
 provider:
   name: aws
-  runtime: nodejs20.x
+  runtime: nodejs22.x
   stage: ${opt:stage, 'dev'}
   region: us-east-1
   environment:
     CUSTOMERS_API_BASE: ${env:CUSTOMERS_API_BASE, 'http://localhost:3001'}
     ORDERS_API_BASE: ${env:ORDERS_API_BASE, 'http://localhost:3002'}
-    SERVICE_TOKEN: ${env:SERVICE_TOKEN, 'service-secret-token'}
+    SERVICE_TOKEN: ${env:SERVICE_TOKEN, 'secret-token'}
+
+build:
+  esbuild:
+    bundle: true
+    minify: false
+    sourcemap: true
+    format: esm
+    target: es2020
+    platform: node
+    mainFields:
+      - module
+      - main
+    banner:
+      js: "import { createRequire } from 'module';const require = createRequire(import.meta.url);"
 
 functions:
   createAndConfirmOrder:
@@ -21,17 +35,9 @@ functions:
           method: post
 
 plugins:
-  - serverless-esbuild
   - serverless-offline
 
 custom:
-  esbuild:
-    bundle: true
-    minify: false
-    sourcemap: true
-    target: node22
-    platform: node
-    format: esm
   serverless-offline:
     httpPort: 3003
     noPrependStageInUrl: true
