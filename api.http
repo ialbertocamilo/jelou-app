@@ -1,0 +1,291 @@
+### Variables
+@customersBaseUrl = http://localhost:3001
+@ordersBaseUrl = http://localhost:3002
+@orchestratorUrl = https://63efqt72we.execute-api.us-east-1.amazonaws.com
+
+# Test data - Update these IDs after creating resources
+@customerId = 1
+@productId = 1
+@orderId = 1
+@serviceToken = service-secret-token
+
+################################################################################
+# CUSTOMERS API
+################################################################################
+
+### Health Check - Customers API
+GET {{customersBaseUrl}}/health
+
+### Create Customer
+POST {{customersBaseUrl}}/customers
+Content-Type: application/json
+
+{
+  "name": "ACME Corporation",
+  "email": "ops@acme.com",
+  "phone": "+1-555-0100"
+}
+
+### Create Another Customer
+POST {{customersBaseUrl}}/customers
+Content-Type: application/json
+
+{
+  "name": "Tech Solutions Inc",
+  "email": "contact@techsolutions.com",
+  "phone": "+1-555-0200"
+}
+
+### Get Customer by ID
+GET {{customersBaseUrl}}/customers/{{customerId}}
+
+### Search Customers (all)
+GET {{customersBaseUrl}}/customers
+
+### Search Customers (with search term)
+GET {{customersBaseUrl}}/customers?search=acme
+
+### Search Customers (with pagination)
+GET {{customersBaseUrl}}/customers?limit=10&cursor=5
+
+### Update Customer
+PUT {{customersBaseUrl}}/customers/{{customerId}}
+Content-Type: application/json
+
+{
+  "name": "ACME Corporation Updated",
+  "phone": "+1-555-0101"
+}
+
+### Delete Customer
+DELETE {{customersBaseUrl}}/customers/{{customerId}}
+
+### Get Customer by ID (Internal - Service Auth)
+GET {{customersBaseUrl}}/internal/customers/{{customerId}}
+Authorization: Bearer {{serviceToken}}
+
+################################################################################
+# PRODUCTS API
+################################################################################
+
+### Health Check - Orders API
+GET {{ordersBaseUrl}}/health
+
+### Create Product
+POST {{ordersBaseUrl}}/products
+Content-Type: application/json
+
+{
+  "sku": "LAPTOP-PRO-15",
+  "name": "Laptop Pro 15 inch",
+  "price_cents": 129900,
+  "stock": 50
+}
+
+### Create Another Product
+POST {{ordersBaseUrl}}/products
+Content-Type: application/json
+
+{
+  "sku": "MOUSE-WIRELESS-1",
+  "name": "Wireless Mouse",
+  "price_cents": 2999,
+  "stock": 100
+}
+
+### Create Third Product
+POST {{ordersBaseUrl}}/products
+Content-Type: application/json
+
+{
+  "sku": "KEYBOARD-MECH",
+  "name": "Mechanical Keyboard",
+  "price_cents": 8999,
+  "stock": 75
+}
+
+### Get Product by ID
+GET {{ordersBaseUrl}}/products/{{productId}}
+
+### Search Products (all)
+GET {{ordersBaseUrl}}/products
+
+### Search Products (with search term)
+GET {{ordersBaseUrl}}/products?search=laptop
+
+### Search Products (with pagination)
+GET {{ordersBaseUrl}}/products?limit=10&cursor=2
+
+### Update Product (price and stock)
+PATCH {{ordersBaseUrl}}/products/{{productId}}
+Content-Type: application/json
+
+{
+  "price_cents": 119900,
+  "stock": 45
+}
+
+################################################################################
+# ORDERS API
+################################################################################
+
+### Create Order
+POST {{ordersBaseUrl}}/orders
+Content-Type: application/json
+
+{
+  "customer_id": 1,
+  "items": [
+    {
+      "product_id": 2,
+      "qty": 3
+    },
+    {
+      "product_id": 3,
+      "qty": 1
+    }
+  ]
+}
+
+### Get Order by ID
+GET {{ordersBaseUrl}}/orders/{{orderId}}
+
+### Search Orders (all)
+GET {{ordersBaseUrl}}/orders
+
+### Search Orders (by status)
+GET {{ordersBaseUrl}}/orders?status=CREATED
+
+### Search Orders (by date range)
+GET {{ordersBaseUrl}}/orders?from=2025-11-01T00:00:00Z&to=2025-11-30T23:59:59Z
+
+### Search Orders (with pagination)
+GET {{ordersBaseUrl}}/orders?limit=10&cursor=5
+
+### Confirm Order (Idempotent)
+POST {{ordersBaseUrl}}/orders/{{orderId}}/confirm
+X-Idempotency-Key: unique-key-abc-123
+
+### Confirm Order (Retry with same key - should return cached response)
+POST {{ordersBaseUrl}}/orders/{{orderId}}/confirm
+X-Idempotency-Key: unique-key-abc-123
+
+### Cancel Order
+POST {{ordersBaseUrl}}/orders/{{orderId}}/cancel
+
+################################################################################
+# ORCHESTRATOR (Lambda)
+################################################################################
+
+### Create and Confirm Order (with correlation ID)
+POST {{orchestratorUrl}}/orchestrator/create-and-confirm-order
+Content-Type: application/json
+
+{
+  "customer_id": 1,
+  "items": [
+    {
+      "product_id": 2,
+      "qty": 3
+    }
+  ],
+  "idempotency_key": "unique-key-123",
+  "correlation_id": "req-abc-123"
+}
+
+### Create and Confirm Order (without correlation ID)
+POST {{orchestratorUrl}}/orchestrator/create-and-confirm-order
+Content-Type: application/json
+
+{
+  "customer_id": 1,
+  "items": [
+    {
+      "product_id": 2,
+      "qty": 2
+    },
+    {
+      "product_id": 3,
+      "qty": 1
+    }
+  ],
+  "idempotency_key": "unique-key-456"
+}
+
+################################################################################
+# ERROR CASES - Test validation and error handling
+################################################################################
+
+### Error: Create Customer with duplicate email
+POST {{customersBaseUrl}}/customers
+Content-Type: application/json
+
+{
+  "name": "Duplicate Test",
+  "email": "ops@acme.com"
+}
+
+### Error: Create Customer with invalid email
+POST {{customersBaseUrl}}/customers
+Content-Type: application/json
+
+{
+  "name": "Invalid Email",
+  "email": "not-an-email"
+}
+
+### Error: Create Customer missing required fields
+POST {{customersBaseUrl}}/customers
+Content-Type: application/json
+
+{
+  "phone": "+1-555-0300"
+}
+
+### Error: Get non-existent customer
+GET {{customersBaseUrl}}/customers/99999
+
+### Error: Create Product with duplicate SKU
+POST {{ordersBaseUrl}}/products
+Content-Type: application/json
+
+{
+  "sku": "LAPTOP-PRO-15",
+  "name": "Duplicate SKU Test",
+  "price_cents": 100000
+}
+
+### Error: Create Order with invalid customer
+POST {{ordersBaseUrl}}/orders
+Content-Type: application/json
+
+{
+  "customer_id": 99999,
+  "items": [
+    {
+      "product_id": 1,
+      "qty": 1
+    }
+  ]
+}
+
+### Error: Create Order with insufficient stock
+POST {{ordersBaseUrl}}/orders
+Content-Type: application/json
+
+{
+  "customer_id": 1,
+  "items": [
+    {
+      "product_id": 1,
+      "qty": 99999
+    }
+  ]
+}
+
+### Error: Confirm order without idempotency key
+POST {{ordersBaseUrl}}/orders/{{orderId}}/confirm
+
+### Error: Confirm non-existent order
+POST {{ordersBaseUrl}}/orders/99999/confirm
+X-Idempotency-Key: unique-key-error-test

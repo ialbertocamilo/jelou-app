@@ -1,0 +1,64 @@
+services:
+  database:
+    image: mysql:8.0
+    ports:
+      - ${MYSQL_PORT}:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'mysqladmin',
+          'ping',
+          '-h',
+          'localhost',
+          '-u',
+          'root',
+          '-p${MYSQL_PASSWORD}'
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  customers-api:
+    build:
+      context: customers-api
+      dockerfile: Dockerfile
+    env_file:
+      - customers-api/.env
+    environment:
+      - PORT=3000
+    ports:
+      - ${CUSTOMERS_PORT}:3000
+    depends_on:
+      database:
+        condition: service_healthy
+    restart: unless-stopped
+
+  orders-api:
+    build:
+      context: orders-api
+      dockerfile: Dockerfile
+    env_file:
+      - orders-api/.env
+    environment:
+      - PORT=3000
+    ports:
+      - ${ORDERS_PORT}:3000
+    depends_on:
+      database:
+        condition: service_healthy
+      customers-api:
+        condition: service_started
+    restart: unless-stopped
+
+volumes:
+  mysql-data:
